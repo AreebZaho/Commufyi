@@ -1,6 +1,6 @@
 import { ID, Query, OAuthProvider } from "appwrite";
 import { appwriteConfig, account, databases, storage, avatars } from "./config";
-import { hostUrl } from "@/constants";
+import { hostUrl, serverErrorMessage } from "@/constants";
 
 // ============================================================
 // AUTH
@@ -11,28 +11,40 @@ export async function usernameExists(username) {
 		const res = await databases.listDocuments(
 			appwriteConfig.databaseId,
 			appwriteConfig.usersCollectionId,
-			[Query.select("username")]
+			[Query.equal("username", username.toLowerCase())]
 		);
-		return res.documents.some((doc) => doc.username === username);
+		if (!res) throw new Error(serverErrorMessage);
+		return res.total > 0;
 	} catch (error) {
 		console.error(error);
+		throw error;
 	}
-	return null;
 }
 
-export async function getEmails() {
+export async function emailExists(email) {
 	try {
 		const res = await databases.listDocuments(
 			appwriteConfig.databaseId,
 			appwriteConfig.usersCollectionId,
-			[Query.select("email")]
+			[Query.equal("email", email.toLowerCase())]
 		);
+		if (!res) throw new Error(serverErrorMessage);
+		return res.total > 0;
+	} catch (error) {
+		console.error(error);
+		throw error;
+	}
+}
+
+export async function createUserAccount({ email, password, username }) {
+	try {
+		const res = await account.create(ID.unique(), email, password, username);
+		if (!res) throw new Error(serverErrorMessage);
 		return res;
 	} catch (error) {
 		console.error(error);
-		// throw new Error("Something went wrong");
+		throw error;
 	}
-	return null;
 }
 
 export async function createSessionUserIdSecret(userId, secret) {

@@ -4,32 +4,28 @@ import {
   useQueryClient,
   useInfiniteQuery,
 } from "@tanstack/react-query";
-
 import { QUERY_KEYS } from "@/react-query/queryKeys";
-// import {
-//   createUserAccount,
-//   signInAccount,
-//   getCurrentUser,
-//   signOutAccount,
-//   getUsers,
-//   createPost,
-//   getPostById,
-//   updatePost,
-//   getUserPosts,
-//   deletePost,
-//   likePost,
-//   getUserById,
-//   updateUser,
-//   getRecentPosts,
-//   getInfinitePosts,
-//   searchPosts,
-//   savePost,
-//   deleteSavedPost,
-// } from "@/lib/appwrite/api";
+import { usernameExists, emailExists } from "@/db/api";
 
 // ============================================================
-// AUTH QUERIES
+// AUTH
 // ============================================================
+
+export const useUsernameExists = (username) => {
+  return useQuery({
+    queryKey: [username],
+    queryFn: () => usernameExists(username),
+    enabled: !!username,
+  });
+};
+
+export const useEmailExists = (email) => {
+  return useQuery({
+		queryKey: [email],
+		queryFn: () => emailExists(email),
+		enabled: !!email,
+	});
+};
 
 // export const useCreateUserAccount = () => {
 //   return useMutation({

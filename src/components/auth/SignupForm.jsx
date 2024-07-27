@@ -12,8 +12,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { SignupFormSchema } from "@/validation";
-import { useUsernameExits, useDebounce } from "@/hooks";
+import { useDebounce } from "@/hooks";
 import { debounceDelay as delay } from "@/constants";
+import { useUsernameExists, useEmailExists } from "@/react-query/queries";
 
 export default function SignupForm() {
 	const form = useForm({
@@ -26,9 +27,11 @@ export default function SignupForm() {
 	});
 
 	const username = form.watch("username", "");
+	const debouncedUsername = useDebounce(username, delay);
+	const { isError: isErrorUsername, data: usernameExists, error: errorUsername, isFetching: isFetchingUsername } = useUsernameExists(debouncedUsername);
 	const email = form.watch("email", "");
-	const debouncedUsername = useDebounce(username.toLowerCase(), delay);
-	const { exists, loading, error } = useUsernameExits(debouncedUsername);
+	const debouncedEmail = useDebounce(email, delay);
+	const { isError: isErrorEmail, data: emailExists, error: errorEmail, isFetching: isFetchingEmail } = useEmailExists(debouncedEmail);
 
 	const handleSignup = (values) => {
 		console.log(values);
@@ -36,9 +39,6 @@ export default function SignupForm() {
 
 	return (
 		<>
-			{username !== "" && exists && <h1>Exists</h1>}
-			{username !== "" && loading && <h1>Loading</h1>}
-			{username !== "" && error && <h1>Error</h1>}
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(handleSignup)} className="space-y-10">
 					<FormField
@@ -50,9 +50,7 @@ export default function SignupForm() {
 								<FormControl>
 									<Input placeholder="name@example.com" {...field} />
 								</FormControl>
-								{(exists && (
-									<FormMessage>Username already exists</FormMessage>
-								)) || <FormMessage />}
+								<FormMessage>{usernameExists && "Username unavailable :(" || null}</FormMessage>
 							</FormItem>
 						)}
 					/>
@@ -65,9 +63,7 @@ export default function SignupForm() {
 								<FormControl>
 									<Input placeholder="TinyDragon42" {...field} />
 								</FormControl>
-								{(exists && (
-									<FormMessage>Username already exists</FormMessage>
-								)) || <FormMessage />}
+								<FormMessage>{emailExists && "Email unavailable :(" || null}</FormMessage>
 							</FormItem>
 						)}
 					/>
@@ -84,7 +80,9 @@ export default function SignupForm() {
 							</FormItem>
 						)}
 					/>
-					<Button type="submit" disabled={exists}>Continue</Button>
+					<Button type="submit" disabled>
+						Continue
+					</Button>
 				</form>
 			</Form>
 		</>

@@ -1,4 +1,5 @@
 export const hostUrl = "http://localhost:5173/";
+export const serverErrorMessage = "Internal server error. Please try again later.";
 
 const logo = `${import.meta.env.PUBLIC_URL}]/logo.png`;
 const logotype = `${import.meta.env.PUBLIC_URL}]/logotype.png`;
